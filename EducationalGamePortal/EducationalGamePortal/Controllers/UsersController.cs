@@ -13,9 +13,22 @@ namespace EducationalGamePortal.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString)
         {
-            var users = await _context.Users.ToListAsync();
+            var usersQuery = _context.Users.AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                usersQuery = usersQuery.Where(u => u.Nickname.ToLower().Contains(searchString.ToLower()));
+            }
+
+            var users = await usersQuery.ToListAsync();
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_UsersTable", users);
+            }
+
             return View(users);
         }
 

@@ -13,13 +13,31 @@ namespace EducationalGamePortal.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString)
         {
-            var games = await _context.Games
-                .Include(g => g.Levels)
-                .OrderBy(g => g.Subject)
-                .ThenBy(g => g.Title)
-                .ToListAsync();
+            var gamesQuery = _context.Games.Include(g => g.Levels).AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                var lowerSearch = searchString.ToLower();
+                gamesQuery = gamesQuery.Where(g => 
+                    g.Title.ToLower().Contains(lowerSearch) || 
+                    g.Subject.ToLower().Contains(lowerSearch));
+                
+                gamesQuery = gamesQuery.OrderBy(g => g.Title).ThenBy(g => g.Subject);
+            }
+            else
+            {
+                gamesQuery = gamesQuery.OrderBy(g => g.Subject).ThenBy(g => g.Title);
+            }
+
+            var games = await gamesQuery.ToListAsync();
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_GamesTable", games);
+            }
+
             return View(games);
         }
 
