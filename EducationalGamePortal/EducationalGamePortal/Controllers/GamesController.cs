@@ -17,6 +17,8 @@ namespace EducationalGamePortal.Controllers
         {
             var games = await _context.Games
                 .Include(g => g.Levels)
+                .OrderBy(g => g.Subject)
+                .ThenBy(g => g.Title)
                 .ToListAsync();
             return View(games);
         }
@@ -52,6 +54,15 @@ namespace EducationalGamePortal.Controllers
                 return View(game);
             }
 
+            bool gameExists = await _context.Games
+                .AnyAsync(g => g.Subject == game.Subject && g.Title == game.Title);
+
+            if (gameExists)
+            {
+                ModelState.AddModelError("Title", "Гра з такою назвою вже існує в цьому предметі.");
+                return View(game);
+            }
+
             _context.Add(game);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -77,6 +88,15 @@ namespace EducationalGamePortal.Controllers
             {
                 ModelState.Clear();
                 ModelState.AddModelError("", "Поля «Назва» та «Предмет» є обов'язковими для заповнення.");
+                return View(game);
+            }
+
+            bool gameExists = await _context.Games
+                .AnyAsync(g => g.Subject == game.Subject && g.Title == game.Title && g.Id != id);
+
+            if (gameExists)
+            {
+                ModelState.AddModelError("Title", "Гра з такою назвою вже існує в цьому предметі.");
                 return View(game);
             }
 

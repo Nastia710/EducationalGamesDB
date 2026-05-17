@@ -49,10 +49,31 @@ namespace EducationalGamePortal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Level level)
         {
-            if (string.IsNullOrWhiteSpace(level.Title) || string.IsNullOrWhiteSpace(level.Difficulty))
+            if (level.GameId == 0 || level.LevelNumber <= 0 || string.IsNullOrWhiteSpace(level.Title) || string.IsNullOrWhiteSpace(level.Difficulty) || level.MaxScore <= 0)
             {
                 ModelState.Clear();
-                ModelState.AddModelError("", "Поля «Назва» та «Складність» є обов'язковими для заповнення.");
+                if (level.GameId == 0) ModelState.AddModelError("GameId", "Будь ласка, оберіть гру.");
+                if (level.LevelNumber <= 0) ModelState.AddModelError("LevelNumber", "Номер рівня повинен бути більшим за 0.");
+                if (string.IsNullOrWhiteSpace(level.Title)) ModelState.AddModelError("Title", "Назва рівня є обов'язковою.");
+                if (string.IsNullOrWhiteSpace(level.Difficulty)) ModelState.AddModelError("Difficulty", "Складність рівня є обов'язковою.");
+                if (level.MaxScore <= 0) ModelState.AddModelError("MaxScore", "Максимальний бал повинен бути більшим за 0.");
+                
+                ViewBag.Games = new SelectList(await _context.Games.OrderBy(g => g.Title).ToListAsync(), "Id", "Title", level.GameId);
+                return View(level);
+            }
+
+            bool levelNumberExists = await _context.Levels
+                .AnyAsync(l => l.GameId == level.GameId && l.LevelNumber == level.LevelNumber);
+
+            bool levelTitleExists = await _context.Levels
+                .AnyAsync(l => l.GameId == level.GameId && l.Title == level.Title);
+
+            if (levelNumberExists || levelTitleExists)
+            {
+                ModelState.Clear();
+                if (levelNumberExists) ModelState.AddModelError("LevelNumber", "Рівень з таким номером вже існує у вибраній грі.");
+                if (levelTitleExists) ModelState.AddModelError("Title", "Рівень з такою назвою вже існує у вибраній грі.");
+                
                 ViewBag.Games = new SelectList(await _context.Games.OrderBy(g => g.Title).ToListAsync(), "Id", "Title", level.GameId);
                 return View(level);
             }
@@ -70,20 +91,44 @@ namespace EducationalGamePortal.Controllers
             if (level == null) return NotFound();
 
             ViewBag.Games = new SelectList(await _context.Games.OrderBy(g => g.Title).ToListAsync(), "Id", "Title", level.GameId);
+            ViewBag.ReturnUrl = Request.Headers["Referer"].ToString();
             return View(level);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Level level)
+        public async Task<IActionResult> Edit(int id, Level level, string returnUrl)
         {
             if (id != level.Id) return NotFound();
 
-            if (string.IsNullOrWhiteSpace(level.Title) || string.IsNullOrWhiteSpace(level.Difficulty))
+            if (level.GameId == 0 || level.LevelNumber <= 0 || string.IsNullOrWhiteSpace(level.Title) || string.IsNullOrWhiteSpace(level.Difficulty) || level.MaxScore <= 0)
             {
                 ModelState.Clear();
-                ModelState.AddModelError("", "Поля «Назва» та «Складність» є обов'язковими для заповнення.");
+                if (level.GameId == 0) ModelState.AddModelError("GameId", "Будь ласка, оберіть гру.");
+                if (level.LevelNumber <= 0) ModelState.AddModelError("LevelNumber", "Номер рівня повинен бути більшим за 0.");
+                if (string.IsNullOrWhiteSpace(level.Title)) ModelState.AddModelError("Title", "Назва рівня є обов'язковою.");
+                if (string.IsNullOrWhiteSpace(level.Difficulty)) ModelState.AddModelError("Difficulty", "Складність рівня є обов'язковою.");
+                if (level.MaxScore <= 0) ModelState.AddModelError("MaxScore", "Максимальний бал повинен бути більшим за 0.");
+
                 ViewBag.Games = new SelectList(await _context.Games.OrderBy(g => g.Title).ToListAsync(), "Id", "Title", level.GameId);
+                ViewBag.ReturnUrl = returnUrl;
+                return View(level);
+            }
+
+            bool levelNumberExists = await _context.Levels
+                .AnyAsync(l => l.GameId == level.GameId && l.LevelNumber == level.LevelNumber && l.Id != id);
+
+            bool levelTitleExists = await _context.Levels
+                .AnyAsync(l => l.GameId == level.GameId && l.Title == level.Title && l.Id != id);
+
+            if (levelNumberExists || levelTitleExists)
+            {
+                ModelState.Clear();
+                if (levelNumberExists) ModelState.AddModelError("LevelNumber", "Рівень з таким номером вже існує у вибраній грі.");
+                if (levelTitleExists) ModelState.AddModelError("Title", "Рівень з такою назвою вже існує у вибраній грі.");
+                
+                ViewBag.Games = new SelectList(await _context.Games.OrderBy(g => g.Title).ToListAsync(), "Id", "Title", level.GameId);
+                ViewBag.ReturnUrl = returnUrl;
                 return View(level);
             }
 
@@ -105,6 +150,11 @@ namespace EducationalGamePortal.Controllers
                 if (!_context.Levels.Any(e => e.Id == id))
                     return NotFound();
                 throw;
+            }
+
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                return Redirect(returnUrl);
             }
 
             return RedirectToAction(nameof(Index));

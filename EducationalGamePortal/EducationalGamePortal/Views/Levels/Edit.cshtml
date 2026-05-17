@@ -8,10 +8,11 @@
 
 <div class="row">
     <div class="col-md-6">
-        <form asp-action="Edit">
+        <form asp-action="Edit" method="post">
             <div asp-validation-summary="All" class="text-danger"></div>
 
             <input type="hidden" asp-for="Id" />
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
 
             <div class="mb-3">
                 <label asp-for="GameId" class="form-label">Гра</label>
@@ -44,7 +45,14 @@
 
             <div class="mb-3">
                 <button type="submit" class="btn btn-warning">Зберегти зміни</button>
-                <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
+                @if (!string.IsNullOrEmpty((string)ViewBag.ReturnUrl))
+                {
+                    <a href="@ViewBag.ReturnUrl" class="btn btn-secondary">Скасувати</a>
+                }
+                else
+                {
+                    <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
+                }
             </div>
         </form>
     </div>
