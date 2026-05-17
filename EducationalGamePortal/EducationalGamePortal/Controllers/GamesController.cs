@@ -47,7 +47,8 @@ namespace EducationalGamePortal.Controllers
         {
             if (string.IsNullOrWhiteSpace(game.Title) || string.IsNullOrWhiteSpace(game.Subject))
             {
-                ModelState.AddModelError("", "Назва та предмет є обов'язковими полями.");
+                ModelState.Clear();
+                ModelState.AddModelError("", "Поля «Назва» та «Предмет» є обов'язковими для заповнення.");
                 return View(game);
             }
 
@@ -74,7 +75,8 @@ namespace EducationalGamePortal.Controllers
 
             if (string.IsNullOrWhiteSpace(game.Title) || string.IsNullOrWhiteSpace(game.Subject))
             {
-                ModelState.AddModelError("", "Назва та предмет є обов'язковими полями.");
+                ModelState.Clear();
+                ModelState.AddModelError("", "Поля «Назва» та «Предмет» є обов'язковими для заповнення.");
                 return View(game);
             }
 

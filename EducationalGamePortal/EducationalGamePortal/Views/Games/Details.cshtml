@@ -30,7 +30,10 @@
     </div>
 </div>
 
-<h3>Рівні</h3>
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h3 class="mb-0">Рівні</h3>
+    <a asp-controller="Levels" asp-action="Create" asp-route-gameId="@Model.Id" class="btn btn-sm btn-primary">Додати рівень</a>
+</div>
 
 @if (Model.Levels.Any())
 {
@@ -42,6 +45,7 @@
                 <th>Складність</th>
                 <th>Макс. бали</th>
                 <th>Кількість сесій</th>
+                <th>Дії</th>
             </tr>
         </thead>
         <tbody>
@@ -66,6 +70,11 @@
                     </td>
                     <td>@level.MaxScore</td>
                     <td>@level.GameSessions.Count</td>
+                    <td>
+                        <a asp-controller="Levels" asp-action="Details" asp-route-id="@level.Id" class="btn btn-sm btn-info">Деталі</a>
+                        <a asp-controller="Levels" asp-action="Edit" asp-route-id="@level.Id" class="btn btn-sm btn-warning">Редагувати</a>
+                        <a asp-controller="Levels" asp-action="Delete" asp-route-id="@level.Id" class="btn btn-sm btn-danger">Видалити</a>
+                    </td>
                 </tr>
             }
         </tbody>

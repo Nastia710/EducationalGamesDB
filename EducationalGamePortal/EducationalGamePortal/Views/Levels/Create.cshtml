@@ -1,0 +1,52 @@
+@model EducationalGamePortal.Models.Level
+
+@{
+    ViewData["Title"] = "Додати рівень";
+}
+
+<h1>Додати новий рівень</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="GameId" class="form-label">Гра</label>
+                <select asp-for="GameId" asp-items="@ViewBag.Games" class="form-control">
+                    <option value="">-- Оберіть гру --</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="LevelNumber" class="form-label">Номер рівня</label>
+                <input asp-for="LevelNumber" class="form-control" type="number" min="1" placeholder="1" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label">Назва рівня</label>
+                <input asp-for="Title" class="form-control" placeholder="Введіть назву рівня" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Difficulty" class="form-label">Складність</label>
+                <select asp-for="Difficulty" class="form-control">
+                    <option value="">-- Оберіть складність --</option>
+                    <option value="Easy">Легкий</option>
+                    <option value="Medium">Середній</option>
+                    <option value="Hard">Складний</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="MaxScore" class="form-label">Максимальний бал</label>
+                <input asp-for="MaxScore" class="form-control" type="number" min="1" placeholder="100" />
+            </div>
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Створити</button>
+                <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
+            </div>
+        </form>
+    </div>
+</div>
